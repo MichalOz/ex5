@@ -12,7 +12,10 @@ def names_of_registered_students(input_json_path, course_name):
     :param course_name: The name of the course.
     :return: List of the names of the students.
     """
-    pass
+    with open('students_database.json','r') as f:
+        loaded_dict = json.load(f)
+    return [loaded_dict[id][0] for id in loaded_dict.keys()  if course_name in loaded_dict[id][1]]
+
 
 
 def enrollment_numbers(input_json_path, output_file_path):
@@ -23,7 +26,15 @@ def enrollment_numbers(input_json_path, output_file_path):
     :param input_json_path: Path of the students database json file.
     :param output_file_path: Path of the output text file.
     """
-    pass
+    with open('students_database.json','r') as f:
+        loaded_dict = json.load(f)
+    list_courses=[]
+    for id in loaded_dict.keys():
+        list_courses=list(set(list_courses) | set(loaded_dict[id][1]))
+    list_courses.sort()
+    dictionary_courses={course_name:names_of_registered_students(input_json_path,course_name).len() for course_name in list_courses}
+    with open('output_file_path.json','w') as f:
+        json.dump(dictionary_courses,f,indent=1)
 
 
 
@@ -34,7 +45,24 @@ def courses_for_lecturers(json_directory_path, output_json_path):
     :param json_directory_path: Path of the semsters_data files.
     :param output_json_path: Path of the output json file.
     """
-    pass
+    list_lecturers=[]
+    for file in os.listdir(json_directory_path):
+        if file.endswith("json"):
+            with open('students_database.json','r') as f:
+                loaded_dict = json.load(f)
+            for id in loaded_dict.keys():
+                list_lecturers=list(set(list_lecturers) | set(loaded_dict[id][1]))
+    list_lecturers.sort()
 
+    dictionary_lecturers={lecturer:[] for lecturer in list_lecturers}
 
-
+    for file in os.listdir(json_directory_path):
+        if file.endswith("json"):
+            with open('students_database.json','r') as f:
+                loaded_dict = json.load(f)
+            for id in loaded_dict.keys():
+                for lecturer in loaded_dict[id][1]:
+                    dictionary_lecturers[lecturer]=list(set(dictionary_lecturers[lecturer]) | set(loaded_dict[id][0]))
+                    
+    with open('output_json_path.json','w') as f:
+        json.dump(dictionary_lecturers,f,indent=1)
